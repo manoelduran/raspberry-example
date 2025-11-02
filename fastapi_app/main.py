@@ -34,8 +34,6 @@ mqtt_client = mqtt.Client(CallbackAPIVersion.VERSION1, "FastAPI_Receiver_Client"
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
-app = FastAPI(title="MQTT Image Receiver API")
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,6 +46,9 @@ async def lifespan(app: FastAPI):
     print("Desconectando do MQTT...")
     mqtt_client.loop_stop()
     mqtt_client.disconnect()
+
+
+app = FastAPI(title="MQTT Image Receiver API", lifespan=lifespan)
 
 
 @app.get("/")
