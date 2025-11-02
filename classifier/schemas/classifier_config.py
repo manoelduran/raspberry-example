@@ -50,13 +50,15 @@ class ClassifierConfig(BaseModel):
         ap_train = sub.add_parser("train", help="Train an SVM on single-bean images")
         ap_train.add_argument(
             "--data-dir",
-            required=True,
+            required=False,
+            default=Path("data/train"),
             type=Path,
             help="Folder with class subfolders",
         )
         ap_train.add_argument(
             "--out-dir",
-            required=True,
+            required=False,
+            default=Path("model/svm_v1"),
             type=Path,
             help="Where to save the model",
         )
@@ -73,13 +75,15 @@ class ClassifierConfig(BaseModel):
         )
         ap_pred.add_argument(
             "--model-dir",
-            required=True,
+            required=False,
+            default=Path("models/svm_v1"),
             type=Path,
             help="Folder with model assets",
         )
         ap_pred.add_argument(
             "--out-dir",
-            required=True,
+            required=False,
+            default=Path("runs"),
             type=Path,
             help="Output folder",
         )
