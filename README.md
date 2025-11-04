@@ -403,7 +403,7 @@ O projeto utiliza Docker Compose para orquestração:
 **Serviços:**
 
 1. **mosquitto**: Broker MQTT (porta 1883)
-2. **classifier**: Worker de classificação (porta 8100)
+2. **classifier**: Worker de classificação
 
 **Dependências:**
 
@@ -416,7 +416,6 @@ O projeto utiliza Docker Compose para orquestração:
 FROM python:3.12-slim
 # Instala dependências do sistema (OpenCV)
 # Instala dependências Python
-# Expõe porta 8100
 ```
 
 ---
