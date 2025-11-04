@@ -37,8 +37,7 @@ A arquitetura permite processamento assíncrono de imagens através de mensageri
                             └──────────────────────┘
                                      │
                                      ▼
-                            Publica resultados em
-                            tópico 'cocoa/results'
+                            Salva resultados em disco
 ```
 
 ### 2.2 Tecnologias Utilizadas
