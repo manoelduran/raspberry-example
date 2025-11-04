@@ -545,8 +545,3 @@ A arquitetura modular facilita manutenção e extensão, enquanto a integração
 O sistema está pronto para uso prático e pode servir como base para futuras melhorias, especialmente com a incorporação de técnicas de deep learning para aumentar ainda mais a precisão e robustez.
 
 ---
-
-**Data do Relatório**: Novembro 2024  
-**Versão do Projeto**: 0.1.0  
-**Python**: 3.12+  
-**Principais Dependências**: OpenCV 4.11, scikit-learn 1.7
