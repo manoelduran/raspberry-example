@@ -17,9 +17,10 @@ services:
 
   classifier:
     container_name: cocoa_classifier
+    volumes:
+      - ./classifier:/app
     build:
       context: ./classifier
-
     ports:
       - "8100:8100"
 
