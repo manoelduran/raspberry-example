@@ -27,8 +27,8 @@ MQTT_RESULT_TOPIC = "cocoa/results"
 
 def load_model():
     try:
-        model_dir = Path("models/svm_v1")
-        model = load("models/svm_v1/model.pkl")
+        model_dir = Path("model/svm_v1")
+        model = load("model/svm_v1/model.pkl")
         with open(model_dir / "classes.json") as f:
             classes = json.load(f)
 
