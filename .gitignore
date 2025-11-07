@@ -1,8 +1,6 @@
 .venv
 venv
 __pycache__
-classifier/data/*
-classifier/model/**/*.pkl
 !classifier/data/.gitkeep
 classifier/runs/**/*
 !classifier/runs/.gitkeep

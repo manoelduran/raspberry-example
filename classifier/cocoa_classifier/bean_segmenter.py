@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 from cv2.typing import MatLike
 
@@ -6,8 +7,9 @@ from .helpers import convert_to_bgr, convert_to_lab, get_blurred_gray
 from .segment_params import SegmentParams
 
 
-def segment_beans(image: np.ndarray, params: SegmentParams) -> list[np.ndarray]:
+def segment_beans(image: np.ndarray, params: SegmentParams, debug: bool = False) -> list[np.ndarray]:
     """Return binary mask and list of contours for each bean after watershed splitting."""
+    os.makedirs("steps", exist_ok=True)
     blur = _preprocess_to_gray(image)
     white_foreground = _binarize_to_foreground(blur)
     opened = _open_foreground(white_foreground, params.open_ksize)
@@ -16,7 +18,21 @@ def segment_beans(image: np.ndarray, params: SegmentParams) -> list[np.ndarray]:
     unknown = _compute_unknown(sure_background, sure_foreground)
     markers = _compute_markers(sure_foreground, unknown)
 
+
     _apply_watershed_in_place(image, markers)
+
+    if debug:
+        for filename, img in {
+            "1_blur": blur,
+            "2_white_foreground": white_foreground,
+            "3_opened": opened,
+            "4_sure_background": sure_background,
+            "5_sure_foreground": sure_foreground,
+            "6_unknown": unknown,
+            "7_markers": markers,
+            "8_watershed": image,
+        }.items():
+            cv2.imwrite(f"steps/{filename}.png", img)
 
     contours: list[np.ndarray] = _extract_valid_contours(
         markers,
