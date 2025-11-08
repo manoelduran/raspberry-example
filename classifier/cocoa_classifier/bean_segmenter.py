@@ -152,11 +152,11 @@ def get_contours(image: MatLike, single_bean: bool) -> list[np.ndarray]:
     return segment_beans(
         image,
         SegmentParams(
-            min_area=800,
+            min_area=10000,
             max_area=25_000,
-            open_ksize=5,
-            sure_bg_dilate=5,
-            distance_thresh=0.05,
+            open_ksize=7,
+            sure_bg_dilate=3,
+            distance_thresh=0.3,
         ),
     )
 
