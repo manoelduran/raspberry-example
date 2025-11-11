@@ -8,39 +8,35 @@ from .segment_params import SegmentParams
 
 
 def segment_beans(image: np.ndarray, params: SegmentParams, debug: bool = True) -> list[np.ndarray]:
-    """Return binary mask and list of contours for each bean after watershed splitting."""
+    """Return list of contours for each bean using connected components"""
     os.makedirs("steps", exist_ok=True)
     blur = _preprocess_to_gray(image)
     white_foreground = _binarize_to_foreground(blur)
     opened = _open_foreground(white_foreground, params.open_ksize)
-    sure_background = _dilate_for_sure_background(opened, params.sure_bg_dilate)
-    sure_foreground = _distance_core_sure_foreground(opened, params.distance_thresh)
-    unknown = _compute_unknown(sure_background, sure_foreground)
-    markers = _compute_markers(sure_foreground, unknown)
-
-
-    _apply_watershed_in_place(image, markers)
 
     if debug:
+        result_vis = cv2.cvtColor(opened, cv2.COLOR_GRAY2BGR)
+        contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(result_vis, contours, -1, (0, 255, 0), 2)
+        
         for filename, img in {
             "1_blur": blur,
             "2_white_foreground": white_foreground,
             "3_opened": opened,
-            "4_sure_background": sure_background,
-            "5_sure_foreground": sure_foreground,
-            "6_unknown": unknown,
-            "7_markers": markers,
-            "8_watershed": image,
+            "4_result": result_vis,
         }.items():
             cv2.imwrite(f"steps/{filename}.png", img)
 
-    contours: list[np.ndarray] = _extract_valid_contours(
-        markers,
-        params.min_area,
-        params.max_area,
+    contours, _ = cv2.findContours(
+        opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
     )
 
-    return contours
+    valid_contours = [
+        c for c in contours 
+        if params.min_area <= cv2.contourArea(c) <= params.max_area
+    ]
+
+    return valid_contours
 
 
 def segment_single_bean(image: np.ndarray, params: SegmentParams) -> list[np.ndarray]:
@@ -96,49 +92,6 @@ def _open_foreground(
     return cv2.morphologyEx(image, cv2.MORPH_OPEN, k_shape, iterations=1)
 
 
-def _dilate_for_sure_background(
-    image: np.ndarray,
-    ksize: int,
-) -> np.ndarray:
-    kernel_shape = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (ksize, ksize))
-    return cv2.dilate(image, kernel_shape, iterations=2)
-
-
-def _distance_core_sure_foreground(
-    image: np.ndarray,
-    distance_thresh: float,
-) -> np.ndarray:
-    distance = cv2.distanceTransform(image, cv2.DIST_L2, 5)
-    max_distance = distance.max()
-    normal_distance = distance / max_distance if max_distance > 0 else distance
-    return (normal_distance > distance_thresh).astype(np.uint8) * 255
-
-
-def _compute_unknown(
-    sure_background: np.ndarray,
-    sure_foreground: np.ndarray,
-) -> np.ndarray:
-    """Resolves unknown regions between sure background and sure foreground to form boundaries."""
-    return cv2.subtract(
-        sure_background,
-        sure_foreground,
-    )
-
-
-def _compute_markers(
-    sure_foreground: np.ndarray,
-    unknown: np.ndarray,
-) -> np.ndarray:
-    _, markers = cv2.connectedComponents(sure_foreground)
-    markers = markers + 1
-    markers[unknown == 255] = 0
-    return markers
-
-
-def _apply_watershed_in_place(image: np.ndarray, markers: np.ndarray):
-    cv2.watershed(image, markers)
-
-
 def get_contours(image: MatLike, single_bean: bool) -> list[np.ndarray]:
     if single_bean:
         return segment_single_bean(
@@ -155,21 +108,5 @@ def get_contours(image: MatLike, single_bean: bool) -> list[np.ndarray]:
             min_area=6000,
             max_area=25_000,
             open_ksize=7,
-            sure_bg_dilate=3,
-            distance_thresh=0.3,
         ),
     )
-
-
-def _extract_valid_contours(
-    markers: np.ndarray, min_area: float, max_area: float
-) -> list[np.ndarray]:
-    contours: list[np.ndarray] = []
-    for label in range(2, markers.max() + 1):
-        comp = (markers == label).astype(np.uint8) * 255
-        found, _ = cv2.findContours(comp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for c in found:
-            area = cv2.contourArea(c)
-            if min_area <= area <= max_area:
-                contours.append(c)
-    return contours
