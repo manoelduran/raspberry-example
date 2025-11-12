@@ -1,17 +1,15 @@
 import json
 from pathlib import Path
-
 import numpy as np
 from joblib import dump
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-
 from .data_loader import load_training_samples
 
 
-def train(data_dir: Path, out_dir: Path, single_bean: bool = True):
+def train(data_dir: Path, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
     features_matrix, class_labels, classes = load_training_samples(data_dir)
 

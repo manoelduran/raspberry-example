@@ -1,17 +1,14 @@
 from pathlib import Path
-
 import cv2
 import numpy as np
-from cv2.typing import MatLike
-
-from .bean_segmenter import get_contours
+from .bean_segmenter import segment_beans
+from .segment_params import SegmentParams
 from .feature_contourer import contour_features
 from .helpers import get_blurred_gray
 
 
 def load_training_samples(
     data_dir: Path,
-    single_bean: bool = True,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -32,12 +29,9 @@ def load_training_samples(
             if image is None:
                 continue
 
-            contours = get_contours(image, single_bean)
-
-            if not contours:
-                threshold = _find_threshold(image)
-                contours, _ = _find_contours(threshold)
-                contours = [c for c in contours if len(c) >= 3 and 1000 <= cv2.contourArea(c) <= 100000]
+            contours = segment_beans(
+                image, SegmentParams(min_area=1000, max_area=100000)
+            )
 
             if contours:
                 contour = max(contours, key=cv2.contourArea)
@@ -67,7 +61,7 @@ def _find_threshold(image: np.ndarray) -> np.ndarray:
         blur,
         0,
         255,
-        cv2.THRESH_BINARY + cv2.THRESH_OTSU,
+        cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU,
     )
     return threshold
 
