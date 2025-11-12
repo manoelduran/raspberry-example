@@ -21,7 +21,6 @@ def predict(
     file: bytes,
     model: Any,
     classes: list[str],
-    single_bean: bool = False,
 ):
     image = _decode_image(file)
     contours = segment_single_bean(image, SegmentParams(min_area=1000, max_area=100000))

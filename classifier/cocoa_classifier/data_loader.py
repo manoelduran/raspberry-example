@@ -1,8 +1,6 @@
 from pathlib import Path
-
 import cv2
 import numpy as np
-from cv2.typing import MatLike
 from .bean_segmenter import segment_single_bean
 from .segment_params import SegmentParams
 from .feature_contourer import contour_features
@@ -11,7 +9,6 @@ from .helpers import get_blurred_gray
 
 def load_training_samples(
     data_dir: Path,
-    single_bean: bool = True,
 ) -> tuple[
     np.ndarray,
     np.ndarray,
