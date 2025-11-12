@@ -33,15 +33,6 @@ def load_training_samples(
                 image, SegmentParams(min_area=1000, max_area=100000)
             )
 
-            if not contours:
-                threshold = _find_threshold(image)
-                contours, _ = _find_contours(threshold)
-                contours = [
-                    c
-                    for c in contours
-                    if len(c) >= 3 and 1000 <= cv2.contourArea(c) <= 100000
-                ]
-
             if contours:
                 contour = max(contours, key=cv2.contourArea)
                 features = contour_features(image, contour)
@@ -70,7 +61,7 @@ def _find_threshold(image: np.ndarray) -> np.ndarray:
         blur,
         0,
         255,
-        cv2.THRESH_BINARY + cv2.THRESH_OTSU,
+        cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU,
     )
     return threshold
 
