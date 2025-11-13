@@ -61,7 +61,6 @@ def on_message(client, userdata, msg):
             file=image_data,
             model=shared_state.model,
             classes=shared_state.classes,
-            single_bean=False,
         )
 
         logger.info(f"Prediction completed. Found {len(results)} objects")
